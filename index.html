@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVIDENT — Evidence-Based Architectural Design of Emergency Departments</title>
+<meta name="description" content="EVIDENT investigates how the spatial configuration of emergency departments shapes communication, collaboration and care delivery. A project led by ETH Zürich with Northumbria University and the University of Cambridge.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Expanded:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1F0EA;
+    --paper-2:#E9E7DF;
+    --ink:#14171C;
+    --ink-soft:#3D434C;
+    --ink-faint:#6B7078;
+    --line:#C9C6BC;
+    --accent:#0F7A6B;          /* deep teal: links + interaction */
+    --accent-dark:#0A574C;
+    /* spectral ramp — derived from the integration-map floor in the hero */
+    --hot:#E0463B;
+    --warm:#F09A2C;
+    --yel:#E8C84A;
+    --grn:#4FB39A;
+    --blu:#2E8FA8;
+    --deep:#2C5AA0;
+    --ramp:linear-gradient(90deg,var(--hot),var(--warm),var(--yel),var(--grn),var(--blu),var(--deep));
+    --maxw:1180px;
+    --gut:clamp(1.25rem,5vw,4.5rem);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+  body{
+    font-family:"Newsreader",Georgia,serif;
+    background:var(--paper);
+    color:var(--ink);
+    font-size:1.0625rem;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  a{color:inherit}
+  ::selection{background:var(--accent);color:#fff}
+  :focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:1px}
+
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:.72rem;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    font-weight:500;
+  }
+
+  /* ---------- spectral ramp (signature) ---------- */
+  .ramp{height:4px;width:100%;background:var(--ramp)}
+  .ramp--thin{height:3px}
+
+  /* ===================================================== HERO */
+  .hero{
+    position:relative;
+    min-height:100svh;
+    display:flex;
+    flex-direction:column;
+    color:#fff;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .hero__img{
+    position:absolute;inset:0;z-index:-2;
+    background:#0b0d10 url("webimage.jpg") center/cover no-repeat;
+  }
+  .hero__scrim{
+    position:absolute;inset:0;z-index:-1;
+    background:
+      linear-gradient(180deg,rgba(8,10,13,.60) 0%,rgba(8,10,13,.34) 30%,rgba(8,10,13,.52) 60%,rgba(8,10,13,.88) 100%),
+      rgba(8,10,13,.28);
+  }
+  /* museum keyline frame */
+  .hero__frame{
+    position:absolute;
+    inset:clamp(14px,2.2vw,30px);
+    border:1px solid rgba(255,255,255,.42);
+    z-index:1;pointer-events:none;
+  }
+
+  .hero__top{
+    position:relative;z-index:2;
+    padding:clamp(2rem,5vw,3.4rem) var(--gut) 0;
+    display:flex;justify-content:space-between;gap:1rem;
+    flex-wrap:wrap;
+  }
+  .hero__tag{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;
+    color:rgba(255,255,255,.82);
+  }
+
+  .hero__center{
+    position:relative;z-index:2;
+    flex:1;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    padding:0 var(--gut) clamp(2.2rem,5vw,3.6rem);
+  }
+  .hero__kicker{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:clamp(.7rem,1.4vw,.82rem);
+    letter-spacing:.28em;text-transform:uppercase;
+    color:rgba(255,255,255,.9);
+    margin-bottom:clamp(.6rem,1.4vw,1rem);
+    display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;
+  }
+  .hero__kicker::before{
+    content:"";width:46px;height:4px;background:var(--ramp);display:inline-block;
+  }
+  .wordmark{
+    font-family:"Archivo Expanded","Archivo",sans-serif;
+    font-weight:800;
+    font-size:clamp(3.4rem,15.5vw,15rem);
+    line-height:.86;
+    letter-spacing:.01em;
+    margin:0;
+    text-transform:uppercase;
+  }
+  .wordmark span{display:inline-block}
+  .hero__institutions{
+    margin-top:clamp(1rem,2.4vw,1.7rem);
+    font-family:"IBM Plex Mono",monospace;
+    font-size:clamp(.74rem,1.5vw,.92rem);
+    letter-spacing:.04em;
+    color:rgba(255,255,255,.92);
+    display:flex;align-items:baseline;gap:.6rem .9rem;flex-wrap:wrap;
+  }
+  .hero__institutions .lead{color:#fff;font-weight:500}
+  .hero__institutions .dot{color:rgba(255,255,255,.5)}
+  .hero__institutions .lead-flag{
+    font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+    border:1px solid rgba(255,255,255,.55);
+    padding:.16em .5em;border-radius:2px;margin-left:.15rem;
+    color:rgba(255,255,255,.9);
+  }
+
+  .hero__caption{
+    position:relative;z-index:2;
+    padding:0 var(--gut) clamp(1.1rem,2.5vw,1.6rem);
+    font-family:"IBM Plex Mono",monospace;
+    font-size:.68rem;letter-spacing:.05em;
+    color:rgba(255,255,255,.62);
+    max-width:42ch;
+  }
+
+  /* word reveal on load */
+  .reveal-word{opacity:0;transform:translateY(18px)}
+  .loaded .reveal-word{
+    opacity:1;transform:none;
+    transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1);
+  }
+  .loaded .reveal-word.d1{transition-delay:.05s}
+  .loaded .reveal-word.d2{transition-delay:.16s}
+  .loaded .reveal-word.d3{transition-delay:.27s}
+
+  /* ===================================================== layout shells */
+  .section{padding:clamp(3.6rem,8vw,7rem) var(--gut)}
+  .wrap{max-width:var(--maxw);margin:0 auto}
+  .section-head{
+    display:flex;align-items:baseline;gap:1rem;
+    border-bottom:1px solid var(--line);
+    padding-bottom:1.1rem;margin-bottom:clamp(2rem,4.5vw,3.4rem);
+  }
+  .section-head .idx{
+    font-family:"IBM Plex Mono",monospace;font-size:.72rem;
+    letter-spacing:.18em;color:var(--ink-faint);margin-left:auto;
+  }
+  .section-title{
+    font-family:"Archivo",sans-serif;font-weight:700;
+    font-size:clamp(1.6rem,4vw,2.5rem);line-height:1.04;
+    letter-spacing:-.01em;
+  }
+
+  /* ---------- project ---------- */
+  .project{background:var(--paper)}
+  .project__title{
+    font-family:"Newsreader",serif;font-weight:400;
+    font-size:clamp(1.55rem,3.6vw,2.5rem);
+    line-height:1.18;letter-spacing:-.01em;
+    max-width:24ch;margin-bottom:1.4rem;
+  }
+  .project__title b{font-weight:500}
+  .snsf{
+    font-family:"IBM Plex Mono",monospace;font-size:.78rem;
+    letter-spacing:.04em;color:var(--ink-soft);
+    display:inline-flex;align-items:center;gap:.55rem;
+    text-decoration:none;border-bottom:1px solid var(--line);
+    padding-bottom:.18rem;transition:color .2s,border-color .2s;
+  }
+  .snsf:hover{color:var(--accent);border-color:var(--accent)}
+  .snsf .arrow{transition:transform .2s}
+  .snsf:hover .arrow{transform:translate(2px,-2px)}
+
+  .movements{
+    margin-top:clamp(2.6rem,6vw,4.5rem);
+    display:grid;gap:clamp(2rem,4vw,3.2rem);
+  }
+  .move{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,2.1fr);
+    gap:clamp(1rem,3vw,2.6rem);
+    align-items:start;
+  }
+  .move__label{position:relative;padding-left:1.5rem}
+  .move__label::before{
+    content:"";position:absolute;left:0;top:.45rem;
+    width:9px;height:9px;border-radius:50%;
+  }
+  .move--a .move__label::before{background:var(--hot)}
+  .move--b .move__label::before{background:var(--grn)}
+  .move--c .move__label::before{background:var(--deep)}
+  .move__kicker{
+    font-family:"IBM Plex Mono",monospace;font-size:.7rem;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);
+    margin-bottom:.5rem;
+  }
+  .move__name{
+    font-family:"Archivo",sans-serif;font-weight:700;
+    font-size:clamp(1.25rem,2.4vw,1.7rem);line-height:1.05;
+    letter-spacing:-.01em;
+  }
+  .move__body{font-size:1.075rem;color:var(--ink-soft);line-height:1.66}
+  .move__body + .move__body{margin-top:.9rem}
+
+  /* ---------- team ---------- */
+  .team{background:var(--paper-2)}
+  .role-block + .role-block{margin-top:clamp(2.6rem,5vw,4rem)}
+  .role-label{
+    font-family:"IBM Plex Mono",monospace;font-size:.74rem;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);
+    display:flex;align-items:center;gap:.8rem;margin-bottom:1.6rem;
+  }
+  .role-label::after{content:"";flex:1;height:1px;background:var(--line)}
+  .people{
+    display:grid;gap:1px;background:var(--line);
+    border:1px solid var(--line);
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));
+  }
+  .person{
+    background:var(--paper);
+    padding:clamp(1.4rem,2.6vw,1.9rem);
+    display:flex;flex-direction:column;gap:.5rem;
+  }
+  .person__name{
+    font-family:"Archivo",sans-serif;font-weight:700;
+    font-size:1.18rem;line-height:1.2;letter-spacing:-.01em;
+    text-decoration:none;color:var(--ink);
+    display:inline-flex;align-items:baseline;gap:.4rem;
+    width:fit-content;
+  }
+  .person__name .ext{
+    font-family:"IBM Plex Mono",monospace;font-size:.7rem;font-weight:400;
+    color:var(--ink-faint);transition:transform .2s,color .2s;
+  }
+  .person__name{background-image:linear-gradient(var(--accent),var(--accent));
+    background-size:0% 1.5px;background-repeat:no-repeat;background-position:0 100%;
+    transition:background-size .28s ease,color .2s}
+  .person__name:hover{color:var(--accent-dark);background-size:100% 1.5px}
+  .person__name:hover .ext{color:var(--accent);transform:translate(2px,-2px)}
+  .person__inst{
+    font-family:"IBM Plex Mono",monospace;font-size:.72rem;
+    letter-spacing:.04em;color:var(--ink-faint);
+  }
+  .person__bio{font-size:.98rem;color:var(--ink-soft);line-height:1.55;margin-top:.25rem}
+
+  /* ---------- competition ---------- */
+  .competition{background:var(--ink);color:var(--paper)}
+  .competition .section-head{border-color:rgba(255,255,255,.18)}
+  .competition .section-title{color:#fff}
+  .competition .section-head .idx{color:rgba(255,255,255,.5)}
+  .comp-panel{
+    display:grid;grid-template-columns:auto 1fr;gap:clamp(1.2rem,4vw,3rem);
+    align-items:center;
+  }
+  .comp-status{
+    font-family:"IBM Plex Mono",monospace;font-size:.72rem;
+    letter-spacing:.18em;text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:.6rem;
+    color:var(--yel);white-space:nowrap;
+  }
+  .comp-status .pulse{
+    width:8px;height:8px;border-radius:50%;background:var(--warm);
+    box-shadow:0 0 0 0 rgba(240,154,44,.6);
+    animation:pulse 2.4s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(240,154,44,.55)}
+    70%{box-shadow:0 0 0 12px rgba(240,154,44,0)}
+    100%{box-shadow:0 0 0 0 rgba(240,154,44,0)}
+  }
+  @media (prefers-reduced-motion:reduce){.comp-status .pulse{animation:none}}
+  .comp-text{
+    font-family:"Newsreader",serif;font-size:clamp(1.15rem,2.4vw,1.6rem);
+    line-height:1.35;color:rgba(255,255,255,.9);font-weight:300;max-width:40ch;
+  }
+
+  /* ---------- contact / footer ---------- */
+  .contact{background:var(--paper);padding-top:clamp(3rem,6vw,5rem)}
+  .contact__grid{
+    display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;
+    align-items:flex-end;
+  }
+  .contact__label{margin-bottom:.6rem}
+  .contact__org{
+    font-family:"Archivo",sans-serif;font-weight:700;
+    font-size:clamp(1.4rem,3vw,2rem);line-height:1.1;letter-spacing:-.01em;
+  }
+  .contact__org span{display:block;font-weight:400;font-size:.95rem;
+    font-family:"IBM Plex Mono",monospace;color:var(--ink-faint);
+    letter-spacing:.04em;margin-top:.5rem}
+  .footer{
+    border-top:1px solid var(--line);
+    margin-top:clamp(3rem,6vw,5rem);
+    padding:1.6rem var(--gut);
+    display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    font-family:"IBM Plex Mono",monospace;font-size:.7rem;
+    letter-spacing:.05em;color:var(--ink-faint);
+    max-width:none;
+  }
+
+  /* scroll reveal */
+  .r{opacity:0;transform:translateY(22px);
+     transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .r.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .r{opacity:1!important;transform:none!important;transition:none}
+    .reveal-word{opacity:1!important;transform:none!important}
+  }
+
+  @media (max-width:720px){
+    .move{grid-template-columns:1fr;gap:.6rem}
+    .move__label{padding-left:1.4rem}
+    .comp-panel{grid-template-columns:1fr;align-items:start}
+    .section-head{flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================== HERO ============================== -->
+<header class="hero">
+  <div class="hero__img" role="img" aria-label="Full scale emergency department prototype built in a research hall, with the floor projection mapped as a colour graded spatial integration map, partition walls forming bays, and a central nurse station."></div>
+  <div class="hero__scrim"></div>
+  <div class="hero__frame"></div>
+
+  <div class="hero__top">
+    <span class="hero__tag">SNSF Research Project</span>
+  </div>
+
+  <div class="hero__center">
+    <p class="hero__kicker">Evidence-based design of emergency departments</p>
+    <h1 class="wordmark" aria-label="EVIDENT">
+      <span class="reveal-word d1">EVI</span><span class="reveal-word d2">DE</span><span class="reveal-word d3">NT</span>
+    </h1>
+    <p class="hero__institutions">
+      <span>ETH Zürich</span>
+      <span class="dot">/</span>
+      <span>Northumbria University</span>
+      <span class="dot">/</span>
+      <span>University of Cambridge</span>
+    </p>
+  </div>
+
+  <div class="ramp"></div>
+</header>
+
+<!-- ============================== PROJECT ============================== -->
+<section class="section project" id="project">
+  <div class="wrap">
+    <div class="section-head r">
+      <span class="eyebrow">The Project</span>
+      <span class="idx">01 / Overview</span>
+    </div>
+
+    <h2 class="project__title r"><b>EVIDENT:</b> Evidence-Based Architectural Design of Emergency Departments for Greater Communication, Collaboration and Care Delivery</h2>
+
+    <a class="snsf r" href="https://data.snf.ch/grants/grant/10002845" target="_blank" rel="noopener">
+      View on the SNSF grant database
+      <span class="arrow">↗</span>
+    </a>
+
+    <div class="movements">
+      <div class="move move--a r">
+        <div class="move__label">
+          <p class="move__kicker">The challenge</p>
+          <h3 class="move__name">Coordination under pressure</h3>
+        </div>
+        <div>
+          <p class="move__body">Emergency Departments are critical entry points for hospital care, where clinical teams must coordinate rapidly and under sustained pressure. Much of this coordination relies on face to face interaction, the synchronous exchange of verbal and nonverbal cues that underpins effective communication and is associated with higher staff wellbeing and better patient outcomes.</p>
+          <p class="move__body">Designing for such interaction is difficult, since the openness that enables it can also increase interruptions and compromise patient privacy. Crucially, while the effects of local features are relatively well understood, the influence of an ED's overall spatial configuration, its patterns of visibility, accessibility and movement, remains underexamined.</p>
+        </div>
+      </div>
+
+      <div class="move move--b r">
+        <div class="move__label">
+          <p class="move__kicker">The approach</p>
+          <h3 class="move__name">From full scale mockup to co-design</h3>
+        </div>
+        <div>
+          <p class="move__body">This interdisciplinary project integrates architecture, cognitive science and healthcare research to examine how the spatial layout of EDs shapes interaction among healthcare workers. Spatial analysis of existing departments is combined with empirical observation using wearable proximity sensors, shadowing and video based methods to link interaction patterns to communication, collaboration and quality of care.</p>
+          <p class="move__body">These findings inform digital design tools that predict how a given configuration supports interaction while managing interruptions and privacy, applied through co-design of the new University Hospital Zurich ED, opening in 2028.</p>
+        </div>
+      </div>
+
+      <div class="move move--c r">
+        <div class="move__label">
+          <p class="move__kicker">Why it matters</p>
+          <h3 class="move__name">Design for safety and wellbeing</h3>
+        </div>
+        <div>
+          <p class="move__body">By translating evidence on interaction into design tools, the project advances evidence based, human centric ED design that supports both patient safety and staff wellbeing. Its findings also generalise to other settings in which spatial configuration shapes how people communicate and collaborate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ramp ramp--thin"></div>
+
+<!-- ============================== TEAM ============================== -->
+<section class="section team" id="team">
+  <div class="wrap">
+    <div class="section-head r">
+      <span class="eyebrow">The Team</span>
+      <span class="idx">02 / People</span>
+    </div>
+
+    <div class="role-block r">
+      <p class="role-label">Principal Investigators</p>
+      <div class="people">
+        <article class="person">
+          <a class="person__name" href="https://cog.ethz.ch/people/prof--dr--christoph-hoelscher.html" target="_blank" rel="noopener">Prof. Dr. Christoph Hölscher <span class="ext">↗</span></a>
+          <span class="person__inst">ETH Zürich</span>
+          <p class="person__bio">Full Professor of Cognitive Science at ETH Zürich and honorary senior research fellow at the Bartlett School of Architecture, UCL. His research spans wayfinding in built environments, spatial cognition and usability for architectural design, and human computer interaction.</p>
+        </article>
+        <article class="person">
+          <a class="person__name" href="https://www.northumbria.ac.uk/about-us/our-staff/d/ruth-dalton/" target="_blank" rel="noopener">Prof. Dr. Ruth Conroy Dalton <span class="ext">↗</span></a>
+          <span class="person__inst">Northumbria University</span>
+          <p class="person__bio">Professor of Architecture at Northumbria University and a world leading authority on the overlap between architecture and spatial cognition. A licensed architect and author of more than 200 publications, she is an expert in space syntax analysis, pedestrian movement, and wayfinding.</p>
+        </article>
+        <article class="person">
+          <a class="person__name" href="https://www.arct.cam.ac.uk/staff/dr-michal-gath-morad" target="_blank" rel="noopener">Dr. Michal Gath-Morad <span class="ext">↗</span></a>
+          <span class="person__inst">University of Cambridge</span>
+          <p class="person__bio">Assistant Professor at the Department of Architecture, University of Cambridge, where she directs the Cambridge Cognitive Architecture group. Her work integrates architecture, cognitive science, and neuroscience to study how spatial configuration shapes cognition, stress, and team performance, with a current focus on healthcare and other high stress environments.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="role-block r">
+      <p class="role-label">Postdoctoral Researchers</p>
+      <div class="people">
+        <article class="person">
+          <a class="person__name" href="https://cog.ethz.ch/people/dr--leonel_aguilar.html" target="_blank" rel="noopener">Dr. Leonel Aguilar Melgar <span class="ext">↗</span></a>
+          <span class="person__inst">ETH Zürich</span>
+          <p class="person__bio">Lecturer and Postdoctoral Researcher in the Cognitive Science group at ETH Zürich. His research models and simulates social phenomena, bridging pedestrian dynamics, high performance computing, machine learning, and cognitive science to build data driven models of human behaviour and decision making.</p>
+        </article>
+        <article class="person">
+          <a class="person__name" href="https://gess.ethz.ch/en/the-department/people/person-detail.MzY5MTU2.TGlzdC81MTIsNjE4MTIwODY=.html" target="_blank" rel="noopener">Dr. Theresa Wheele <span class="ext">↗</span></a>
+          <span class="person__inst">ETH Zürich</span>
+          <p class="person__bio">Postdoctoral researcher in the Cognitive Science department at ETH Zürich, studying how spatial configuration influences communication, collaboration, and stress among healthcare workers in hospital emergency departments. Her work translates research on user behaviour, human computer interaction, and spatial planning into practical spatial UX strategies.</p>
+        </article>
+        <article class="person">
+          <a class="person__name" href="https://www.arct.cam.ac.uk/staff/dr-simon-ladouce" target="_blank" rel="noopener">Dr. Simon Ladouce <span class="ext">↗</span></a>
+          <span class="person__inst">University of Cambridge</span>
+          <p class="person__bio">Associate Researcher at the Cambridge Cognitive Architecture lab, working across cognitive neuroscience, human computer interaction, and architecture. He combines portable neuroimaging and body based sensing, including mobile EEG, eye tracking, and motion sensors, with AI methods to study how built and natural environments shape perception, attention, and behaviour.</p>
+        </article>
+        <article class="person">
+          <a class="person__name" href="https://www.northumbria.ac.uk/about-us/our-staff/l/chenyang-li/" target="_blank" rel="noopener">Dr. Chenyang Li <span class="ext">↗</span></a>
+          <span class="person__inst">Northumbria University</span>
+          <p class="person__bio">Research Fellow in Architecture at Northumbria University. His research combines computational spatial analysis and space syntax with full scale prototyping to examine how emergency department layout shapes staff movement, visual attention, and interprofessional communication.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== COMPETITION ============================== -->
+<section class="section competition" id="competition">
+  <div class="wrap">
+    <div class="section-head r">
+      <span class="eyebrow" style="color:rgba(255,255,255,.6)">Architectural Competition</span>
+      <span class="idx">03 / Engage</span>
+    </div>
+    <div class="comp-panel r">
+      <span class="comp-status"><span class="pulse"></span> To be announced</span>
+      <p class="comp-text">An open architectural competition on the emergency department of the future. Brief, site and entry details will be published here.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CONTACT ============================== -->
+<section class="section contact" id="contact">
+  <div class="wrap">
+    <div class="section-head r">
+      <span class="eyebrow">Contact</span>
+      <span class="idx">04 / Reach us</span>
+    </div>
+    <div class="contact__grid r">
+      <div>
+        <p class="eyebrow contact__label">Project enquiries</p>
+        <p class="contact__org">Chair of Cognitive Science
+          <span>ETH Zürich</span>
+        </p>
+      </div>
+      <a class="snsf" href="https://cog.ethz.ch/" target="_blank" rel="noopener">cog.ethz.ch <span class="arrow">↗</span></a>
+    </div>
+  </div>
+  <div class="ramp ramp--thin" style="margin-top:clamp(2.5rem,5vw,4rem)"></div>
+  <div class="footer">
+    <span>EVIDENT — SNSF Project 10002845</span>
+    <span>ETH Zürich · Northumbria University · University of Cambridge</span>
+  </div>
+</section>
+
+<script>
+  // hero word reveal on load
+  window.addEventListener("load", () => document.body.classList.add("loaded"));
+  document.addEventListener("DOMContentLoaded", () => document.body.classList.add("loaded"));
+
+  // scroll reveal
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const items = document.querySelectorAll(".r");
+  if (prefersReduced || !("IntersectionObserver" in window)) {
+    items.forEach(el => el.classList.add("in"));
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    items.forEach(el => io.observe(el));
+  }
+</script>
+</body>
+</html>
